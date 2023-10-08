@@ -150,7 +150,7 @@ void Town::HarvestCrops() {
 
 bool Town::SowCrops(int acresToSow) {
     if (acresToSow > population_ * 10 || acresToSow > wheatInStorage_ * 2 || acresToSow < 0) return false;
-    wheatInStorage_ -= acresToSow / 2;
+    wheatInStorage_ -= std::ceil(acresToSow / 2.0);
     wheatSowed_ = acresToSow;
     return true;
 }
@@ -208,6 +208,7 @@ void Game::LoadGame() {
 
     if (file.is_open()) {
         char c;
+        bool loadGame = false;
 
         do {
             std::cout << "Do you want to load the game? Y/N: ";
@@ -215,13 +216,16 @@ void Game::LoadGame() {
 
             if (c == 'N' || c == 'n') {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                return;
+                break;
+            } else if (c == 'Y' || c == 'y'){
+                loadGame = true;
             }
-        } while (c != 'Y' && c != 'y');
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } while (!loadGame);
 
-        file.read(reinterpret_cast<char*>(this), sizeof(*this));
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Game loaded." << std::endl;
+        if (loadGame) {
+            file.read(reinterpret_cast<char*>(this), sizeof(*this));
+        }
     }
 }
 
@@ -235,7 +239,7 @@ bool Game::QuitGame() {
         return true;
     }
 
-    if(c != '\n') std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (c != '\n') std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return false;
 }
 
